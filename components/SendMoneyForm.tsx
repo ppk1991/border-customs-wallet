@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { WALLETS, computeRiskScore } from '../services/geminiService'; // repurposed
 import { CrossingContext, RiskResult } from '../types';
@@ -59,7 +60,7 @@ const OfficerView: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Border Guard and Customs Dashboard</h2>
+      <h2 className="text-2xl font-bold mb-6">Officer Dashboard</h2>
       
       <div className="mb-8">
         <label htmlFor="wallet-select" className="block text-sm font-medium text-gray-400 mb-1">Scan / select wallet token</label>
