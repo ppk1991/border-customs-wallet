@@ -7,6 +7,20 @@ export interface Credential {
   metadata: Record<string, string>;
 }
 
+export interface CrossingHistoryEntry {
+  date: string;
+  origin: string;
+  destination: string;
+  outcome: 'Approved' | 'Secondary Inspection' | 'Denied';
+}
+
+export interface SystemAlert {
+  source: 'National Police' | 'Europol' | 'Interpol' | 'Customs Intel';
+  type: 'info' | 'warning' | 'critical';
+  message: string;
+  timestamp: string;
+}
+
 export interface TravelerProfile {
   traveler_id: string;
   full_name: string;
@@ -14,6 +28,8 @@ export interface TravelerProfile {
   date_of_birth: string; // Using string for date
   frequent_traveler: boolean;
   risk_flags: string[];
+  system_alerts: SystemAlert[];
+  crossing_history: CrossingHistoryEntry[];
 }
 
 export interface DigitalWallet {

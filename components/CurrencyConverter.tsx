@@ -14,7 +14,7 @@ const colorMap = {
 const RiskAnalysisResult: React.FC<RiskAnalysisResultProps> = ({ result }) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-bold text-cyan-400">3. Risk Analysis Result</h3>
+      <h3 className="text-xl font-bold text-cyan-400">Risk Analysis Result</h3>
       
       <div className="flex space-x-8 items-center">
         <div className={`p-4 border-l-4 ${colorMap[result.color]} bg-gray-800 rounded-r-lg`}>
@@ -36,7 +36,7 @@ const RiskAnalysisResult: React.FC<RiskAnalysisResultProps> = ({ result }) => {
       </div>
 
       <div>
-        <h3 className="text-xl font-bold text-cyan-400 mt-6">4. Decision Options</h3>
+        <h3 className="text-xl font-bold text-cyan-400 mt-6">Decision Options</h3>
         <div className="flex space-x-4 mt-4">
             <button className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition">Approve</button>
             <button className="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition">Send to secondary inspection</button>

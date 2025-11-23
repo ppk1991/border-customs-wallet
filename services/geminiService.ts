@@ -1,3 +1,4 @@
+
 import { DigitalWallet, CrossingContext, RiskResult } from '../types';
 
 const today = new Date();
@@ -7,6 +8,12 @@ const past2Years = new Date(today.getFullYear() - 2, today.getMonth(), today.get
 const past3Years = new Date(today.getFullYear() - 3, today.getMonth(), today.getDate());
 const past1Year = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 const past10Years = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate());
+
+// Define a representative list of EU member states for risk calculation logic.
+const EU_COUNTRIES = [
+    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR', 
+    'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK'
+];
 
 
 const walletsData: Record<string, DigitalWallet> = {
@@ -18,7 +25,13 @@ const walletsData: Record<string, DigitalWallet> = {
       nationality: "RO",
       date_of_birth: new Date(1995, 3, 12).toISOString().split('T')[0],
       frequent_traveler: true,
-      risk_flags: []
+      risk_flags: [],
+      system_alerts: [],
+      crossing_history: [
+        { date: new Date(2023, 10, 5).toISOString().split('T')[0], origin: 'RO', destination: 'RS', outcome: 'Approved' },
+        { date: new Date(2023, 7, 21).toISOString().split('T')[0], origin: 'RS', destination: 'RO', outcome: 'Approved' },
+        { date: new Date(2023, 5, 1).toISOString().split('T')[0], origin: 'RO', destination: 'US', outcome: 'Approved' },
+      ]
     },
     credentials: [
       {
@@ -44,6 +57,14 @@ const walletsData: Record<string, DigitalWallet> = {
         valid_from: past1Year.toISOString().split('T')[0],
         valid_to: nextYear.toISOString().split('T')[0],
         metadata: { "type": "B1/B2", "category": "Visitor" }
+      },
+      {
+        cred_type: "Visa",
+        issuer: "Canada",
+        id_number: "CAN-VISA-123456",
+        valid_from: past2Years.toISOString().split('T')[0],
+        valid_to: nextYear.toISOString().split('T')[0],
+        metadata: { "type": "visitor", "category": "V-1" }
       }
     ],
     last_updated: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
@@ -57,7 +78,15 @@ const walletsData: Record<string, DigitalWallet> = {
       nationality: "GE",
       date_of_birth: new Date(1988, 9, 2).toISOString().split('T')[0],
       frequent_traveler: false,
-      risk_flags: ["overstay_history"]
+      risk_flags: ["overstay_history"],
+      system_alerts: [
+        { source: 'Europol', type: 'warning', message: 'Subject linked to network with known overstay patterns.', timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+        { source: 'Customs Intel', type: 'info', message: 'Previous travel involved high-value personal electronics.', timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() }
+      ],
+      crossing_history: [
+        { date: new Date(2022, 8, 15).toISOString().split('T')[0], origin: 'GE', destination: 'FR', outcome: 'Secondary Inspection' },
+        { date: new Date(2021, 2, 10).toISOString().split('T')[0], origin: 'FR', destination: 'GE', outcome: 'Approved' },
+      ]
     },
     credentials: [
       {
@@ -88,7 +117,15 @@ const walletsData: Record<string, DigitalWallet> = {
       nationality: "UA",
       date_of_birth: new Date(1979, 0, 27).toISOString().split('T')[0],
       frequent_traveler: false,
-      risk_flags: ["past_refusal"]
+      risk_flags: ["past_refusal"],
+      system_alerts: [
+        { source: 'Interpol', type: 'critical', message: 'Red Notice: Subject wanted for questioning in relation to financial crimes.', timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+        { source: 'National Police', type: 'warning', message: 'Name matches subject with history of undeclared goods.', timestamp: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString() }
+      ],
+      crossing_history: [
+        { date: new Date(2023, 1, 1).toISOString().split('T')[0], origin: 'UA', destination: 'PL', outcome: 'Denied' },
+        { date: new Date(2022, 6, 12).toISOString().split('T')[0], origin: 'PL', destination: 'UA', outcome: 'Approved' },
+      ]
     },
     credentials: [
       {
@@ -110,6 +147,18 @@ export const WALLETS = walletsData;
 export const computeRiskScore = (wallet: DigitalWallet, ctx: CrossingContext): RiskResult => {
   let score = 10;
   const explanations: string[] = [];
+
+  // System Alerts
+  wallet.owner.system_alerts.forEach(alert => {
+    if (alert.type === 'critical') {
+      score += 50;
+      explanations.push(`CRITICAL ALERT from ${alert.source}: ${alert.message}`);
+    } else if (alert.type === 'warning') {
+      score += 25;
+      explanations.push(`Warning from ${alert.source}: ${alert.message}`);
+    }
+  });
+
 
   // Identity & History Risk
   if (wallet.owner.risk_flags.includes("past_refusal")) {
@@ -162,9 +211,10 @@ export const computeRiskScore = (wallet: DigitalWallet, ctx: CrossingContext): R
     explanations.push("Land border crossing with commercial-type vehicle.");
   }
 
-  if (!["RO", "EU", "EEA"].includes(ctx.origin_country)) {
+  // Updated logic: Check for entry into the EU from a non-EU country
+  if (ctx.direction === 'entry' && !EU_COUNTRIES.includes(ctx.origin_country) && EU_COUNTRIES.includes(ctx.destination_country)) {
     score += 10;
-    explanations.push("Origin from non-EU/EEA country.");
+    explanations.push("Origin from non-EU country for entry into EU zone.");
   }
 
   // Mitigating Factors
@@ -189,7 +239,7 @@ export const computeRiskScore = (wallet: DigitalWallet, ctx: CrossingContext): R
   }
 
   if (explanations.length === 0) {
-    explanations.push("No specific risk factors triggered; baseline score applied.");
+    explanations.push("No specific risk factors or alerts triggered; baseline score applied.");
   }
 
   return {

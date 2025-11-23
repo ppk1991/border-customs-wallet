@@ -1,11 +1,17 @@
+
 import React, { useState } from 'react';
 import TravelerView from './components/Dashboard';
 import OfficerView from './components/SendMoneyForm';
 import SystemDiagram from './components/SystemDiagram';
+import { LogoutIcon } from './components/Icons';
 
-type Role = "Traveler Wallet" | "Officer Dashboard";
+type Role = "Traveler Wallet" | "Border Guard and Customs Dashboard";
 
-const App: React.FC = () => {
+interface AppProps {
+  onLogout: () => void;
+}
+
+const App: React.FC<AppProps> = ({ onLogout }) => {
   const [role, setRole] = useState<Role>("Traveler Wallet");
 
   return (
@@ -23,12 +29,21 @@ const App: React.FC = () => {
                 Traveler Wallet
             </button>
             <button
-                onClick={() => setRole("Officer Dashboard")}
+                onClick={() => setRole("Border Guard and Customs Dashboard")}
                 className={`px-4 py-2 rounded-md font-semibold transition-colors text-sm ${
-                    role === "Officer Dashboard" ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
+                    role === "Border Guard and Customs Dashboard" ? 'bg-cyan-600 text-white' : 'bg-gray-700 hover:bg-gray-600'
                 }`}
             >
-                Officer Dashboard
+                Border Guard and Customs Dashboard
+            </button>
+            <div className="border-l border-gray-600 h-6 mx-2"></div>
+            <button
+                onClick={onLogout}
+                className="flex items-center px-4 py-2 rounded-md font-semibold transition-colors text-sm bg-gray-700 hover:bg-red-600"
+                aria-label="Logout"
+            >
+                <LogoutIcon className="w-4 h-4 mr-2" />
+                Logout
             </button>
         </nav>
       </header>
@@ -39,7 +54,7 @@ const App: React.FC = () => {
         <aside className="w-5/12 p-8 border-r border-gray-700 hidden lg:flex flex-col items-center justify-between bg-gray-800/30">
            <SystemDiagram />
            <div className="text-xs text-gray-400 border-t border-gray-700 pt-4 mt-8 w-full">
-                <p><strong>Note:</strong> This is a demo prototype for research on digital wallets, border and customs risk analysis, and explainable AI.</p>
+                <p><strong>Note:</strong> This is a demo prototype for research on digital wallets, and border and customs risk analysis.</p>
            </div>
         </aside>
         
@@ -51,7 +66,7 @@ const App: React.FC = () => {
 
        {/* Footer Note for smaller screens */}
       <footer className="lg:hidden p-4 bg-gray-800 border-t border-gray-700 text-xs text-gray-400">
-        <p><strong>Note:</strong> This is a demo prototype for research on digital wallets, border and customs risk analysis, and explainable AI.</p>
+        <p><strong>Note:</strong> This is a demo prototype for digital wallets. The system diagram is available on larger screens.</p>
       </footer>
     </div>
   );

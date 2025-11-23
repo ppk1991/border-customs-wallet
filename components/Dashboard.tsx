@@ -2,14 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { WALLETS } from '../services/geminiService'; // repurposed
 import WalletSummary from './BalanceCard'; // repurposed
 import CredentialsList from './TransactionHistory'; // repurposed
+import CrossingHistory from './CrossingHistory'; // new
 import { timeAgo } from '../utils';
 import { FingerPrintIcon, SearchIcon } from './Icons';
-
-const CREDENTIAL_TYPE_DESCRIPTIONS: Record<string, string> = {
-    "eID": "Electronic Identification. A digital version of a national ID card or passport.",
-    "Visa": "An official document permitting entry into and travel within a specific country.",
-    "Vaccination": "A digital record of immunizations, like the EU Digital COVID Certificate."
-};
 
 const TravelerView: React.FC = () => {
   const walletIds = Object.keys(WALLETS);
@@ -90,7 +85,7 @@ const TravelerView: React.FC = () => {
           onChange={handleWalletChange}
           className="w-full bg-gray-700 border border-gray-600 rounded-md p-3 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
         >
-          {walletIds.map(id => <option key={id} value={id}>{id} - {WALLETS[id].owner.full_name} (Updated: {timeAgo(WALLETS[id].last_updated)})</option>)}
+          {walletIds.map(id => <option key={id} value={id}>{id} | {WALLETS[id].owner.full_name} | Updated {timeAgo(WALLETS[id].last_updated)}</option>)}
         </select>
       </div>
 
@@ -102,56 +97,50 @@ const TravelerView: React.FC = () => {
         <div>
             <h3 className="text-lg font-semibold text-cyan-400 mb-4">Stored Credentials</h3>
             
-            <div className="space-y-4 mb-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
-              {/* Search Input */}
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <SearchIcon className="h-5 w-5 text-gray-400" />
+            <div className="mb-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Search Input */}
+                <div>
+                  <label htmlFor="search-creds" className="block text-sm font-medium text-gray-400 mb-1">Search by keyword</label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <SearchIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="search-creds"
+                      type="text"
+                      placeholder="Search by issuer or ID number..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 pl-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
+                    />
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Search by issuer or ID number..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 pl-10 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
-                />
-              </div>
 
-              {/* Type Filter Buttons */}
-              <div className="flex items-center flex-wrap gap-2">
-                  <span className="text-sm font-medium text-gray-400 mr-2 shrink-0">Filter by type:</span>
-                  {credentialTypes.map(type => {
-                    const tooltipId = `tooltip-${type.replace(/\s+/g, '-')}`;
-                    const hasTooltip = CREDENTIAL_TYPE_DESCRIPTIONS[type];
-                    return (
-                      <div key={type} className="relative group">
-                          <button
-                              onClick={() => setFilterType(type)}
-                              aria-describedby={hasTooltip ? tooltipId : undefined}
-                              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                                  filterType === type 
-                                      ? 'bg-cyan-600 text-white font-semibold' 
-                                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                              }`}
-                          >
-                              {type}
-                          </button>
-                          {hasTooltip && (
-                            <div 
-                              id={tooltipId}
-                              role="tooltip"
-                              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 p-2 bg-gray-900 border border-gray-600 text-gray-300 text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 invisible group-hover:visible group-focus-within:visible z-10">
-                              {CREDENTIAL_TYPE_DESCRIPTIONS[type]}
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-600"></div>
-                            </div>
-                          )}
-                      </div>
-                    );
-                  })}
+                {/* Type Filter Dropdown */}
+                <div>
+                  <label htmlFor="filter-type" className="block text-sm font-medium text-gray-400 mb-1">Filter by type</label>
+                  <select
+                    id="filter-type"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition"
+                  >
+                    {credentialTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
-            <CredentialsList credentials={filteredCredentials} searchQuery={searchQuery} />
+            <CredentialsList credentials={filteredCredentials} searchQuery={searchQuery} walletId={wallet.wallet_id} />
+        </div>
+
+        <hr className="border-gray-700" />
+        <div>
+            <h3 className="text-lg font-semibold text-cyan-400 mb-4">Border Crossing History</h3>
+            <CrossingHistory history={wallet.owner.crossing_history} />
         </div>
 
         <hr className="border-gray-700" />

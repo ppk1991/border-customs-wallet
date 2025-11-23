@@ -1,5 +1,5 @@
 {
   "name": "Digital Wallet – Border & Customs Demo",
-  "description": "A demo prototype for digital wallets, border and customs risk analysis, and explainable AI.",
+  "description": "A demo prototype for digital wallets on smartphones and tablets, integrating border and customs risk analysis with alerts from law enforcement systems.",
   "requestFramePermissions": []
 }
