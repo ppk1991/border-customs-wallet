@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import TravelerView from './components/Dashboard';
 import OfficerView from './components/SendMoneyForm';
-import SystemDiagram from './components/SystemDiagram';
-import { LogoutIcon, GlobeAltIcon, ShieldCheckIcon, HistoryIcon } from './components/Icons';
+import { LogoutIcon, ShieldCheckIcon } from './components/Icons';
 
-type Role = "Traveler Wallet" | "Officer Dashboard" | "System Workflow";
+type Role = "Traveler Wallet" | "Officer Dashboard";
 
 interface AppProps {
   onLogout: () => void;
@@ -39,15 +38,6 @@ const App: React.FC<AppProps> = ({ onLogout }) => {
         
         <nav className="flex items-center space-x-2">
             <button
-                onClick={() => setRole("System Workflow")}
-                className={`px-4 py-2 rounded-md font-semibold transition-all text-sm flex items-center gap-2 ${
-                    role === "System Workflow" ? 'bg-cyan-600 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'
-                }`}
-            >
-                <HistoryIcon className="w-4 h-4" />
-                Workflow
-            </button>
-            <button
                 onClick={() => setRole("Traveler Wallet")}
                 className={`px-4 py-2 rounded-md font-semibold transition-all text-sm ${
                     role === "Traveler Wallet" ? 'bg-cyan-600 text-white shadow-[0_0_15px_rgba(8,145,178,0.4)]' : 'bg-gray-700/50 text-gray-400 hover:bg-gray-700'
@@ -78,18 +68,6 @@ const App: React.FC<AppProps> = ({ onLogout }) => {
       <main className="flex-1 overflow-y-auto p-4 sm:p-8">
           {role === "Traveler Wallet" && <TravelerView />}
           {role === "Officer Dashboard" && <OfficerView />}
-          {role === "System Workflow" && (
-              <div className="h-full max-w-5xl mx-auto flex flex-col gap-6">
-                <div className="bg-gray-800/50 p-6 rounded-3xl border border-gray-700 text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-30"></div>
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">5-Step Operational Pipeline</h2>
-                    <p className="text-gray-400 text-sm">EU Entry/Exit AI Risk Infrastructure Visualization</p>
-                </div>
-                <div className="bg-gray-900/80 rounded-3xl border border-gray-700 flex-1 overflow-hidden shadow-2xl min-h-[500px]">
-                    <SystemDiagram />
-                </div>
-              </div>
-          )}
       </main>
 
       {/* Global Compliance Footer */}

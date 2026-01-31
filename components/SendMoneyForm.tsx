@@ -5,7 +5,9 @@ import { CrossingContext, RiskSubResult } from '../types';
 import SystemAlerts from './SystemAlerts';
 import SISHistory from './SISHistory';
 import IntelligencePanel from './CurrencyConverter';
-import { ShieldCheckIcon, CheckCircleIcon, SparklesIcon, WalletIcon, DataFusionIcon, AIInferenceIcon, GaugeIcon, FingerPrintIcon, CubeIcon, GlobeAltIcon, SwitchVerticalIcon } from './Icons';
+import ProcessFlow from './ProcessFlow';
+// Fixed the missing ShieldCheckIcon import
+import { CheckCircleIcon, SparklesIcon, WalletIcon, DataFusionIcon, AIInferenceIcon, GaugeIcon, FingerPrintIcon, CubeIcon, GlobeAltIcon, HistoryIcon, ShieldCheckIcon } from './Icons';
 
 const STORAGE_KEYS = {
   WALLET_ID: 'border_core_selected_wallet',
@@ -56,6 +58,7 @@ const OfficerView: React.FC = () => {
   
   const [fusionStep, setFusionStep] = useState<string>('');
   const [currentStepIcon, setCurrentStepIcon] = useState<React.ReactNode>(null);
+  const [showWorkflow, setShowWorkflow] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.WALLET_ID, selectedId);
@@ -166,167 +169,189 @@ const OfficerView: React.FC = () => {
             </div>
 
             <SystemAlerts alerts={wallet.owner.system_alerts} />
+
+            {/* Infrastructure Toggle */}
+            <button 
+                onClick={() => setShowWorkflow(!showWorkflow)}
+                className="w-full bg-gray-950/50 border border-gray-700 p-4 rounded-2xl flex items-center justify-between hover:bg-gray-800 transition-colors group"
+            >
+                <div className="flex items-center gap-3">
+                    <HistoryIcon className="w-5 h-5 text-cyan-500" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 group-hover:text-white">Processing Pipeline</span>
+                </div>
+                <div className={`w-2 h-2 rounded-full ${showWorkflow ? 'bg-cyan-500 animate-pulse' : 'bg-gray-700'}`}></div>
+            </button>
         </div>
 
         {/* Center/Right: Risk Inference and Decision Support */}
         <div className="lg:col-span-8 space-y-6">
-            <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 shadow-2xl">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                        <SparklesIcon className="w-5 h-5 text-cyan-400" />
-                        <h3 className="text-lg font-black text-white uppercase tracking-tighter">Unified Assessment Hub</h3>
+            {showWorkflow ? (
+                <div className="bg-gray-800 rounded-3xl border border-cyan-500/30 overflow-hidden shadow-2xl h-[600px] animate-in fade-in zoom-in-95 duration-500">
+                    <div className="p-4 bg-gray-950 border-b border-gray-700 flex justify-between items-center">
+                        <h4 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Inference Infrastructure View</h4>
+                        <button onClick={() => setShowWorkflow(false)} className="text-gray-500 hover:text-white uppercase text-[8px] font-black tracking-widest">Hide Diagram</button>
                     </div>
-                    <div className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">SID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                    <ProcessFlow initialMode="stack" />
                 </div>
-
-                {/* Structured Context Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                    {/* Routing Intelligence Column */}
-                    <div className="space-y-6 bg-gray-900/30 p-6 rounded-2xl border border-gray-700/50">
-                        <div className="flex items-center gap-2 mb-2">
-                            <GlobeAltIcon className="w-4 h-4 text-cyan-400" />
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Routing Logistics</h4>
+            ) : (
+                <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 shadow-2xl">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-3">
+                            <SparklesIcon className="w-5 h-5 text-cyan-400" />
+                            <h3 className="text-lg font-black text-white uppercase tracking-tighter">Unified Assessment Hub</h3>
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Origin Port</label>
-                                <input 
-                                    type="text" 
-                                    value={context.origin_port}
-                                    onChange={(e) => setContext({...context, origin_port: e.target.value})}
-                                    placeholder="DXB, JFK..."
-                                    className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors uppercase"
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Arrival Port</label>
-                                <input 
-                                    type="text" 
-                                    value={context.arrival_port}
-                                    onChange={(e) => setContext({...context, arrival_port: e.target.value})}
-                                    placeholder="CDG, LHR..."
-                                    className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors uppercase"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Trip Intent</label>
-                            <select 
-                                value={context.trip_intent}
-                                onChange={(e) => setContext({...context, trip_intent: e.target.value as any})}
-                                className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
-                            >
-                                <option value="tourism">Tourism / Leisure</option>
-                                <option value="business">Business / Professional</option>
-                                <option value="transit">Transit / Connection</option>
-                                <option value="family_visit">Visiting Family/Friends</option>
-                                <option value="other">Other / Specialized</option>
-                            </select>
-                        </div>
+                        <div className="text-[10px] font-mono text-gray-500 uppercase tracking-widest">SID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
                     </div>
 
-                    {/* Customs Compliance Column */}
-                    <div className="space-y-6 bg-gray-900/30 p-6 rounded-2xl border border-gray-700/50">
-                        <div className="flex items-center gap-2 mb-2">
-                            <CubeIcon className="w-4 h-4 text-orange-400" />
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Customs Declaration</h4>
-                        </div>
-                        
-                        <div className="space-y-1.5">
-                            <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Goods Classification</label>
-                            <input 
-                                type="text" 
-                                value={context.goods_type}
-                                onChange={(e) => setContext({...context, goods_type: e.target.value})}
-                                placeholder="Electronics, Clothing, Cash..."
-                                className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Declared Value (€)</label>
-                                <input 
-                                    type="number" 
-                                    value={context.declared_goods_value}
-                                    onChange={(e) => setContext({...context, declared_goods_value: Number(e.target.value)})}
-                                    className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
-                                />
+                    {/* Structured Context Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                        {/* Routing Intelligence Column */}
+                        <div className="space-y-6 bg-gray-900/30 p-6 rounded-2xl border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <GlobeAltIcon className="w-4 h-4 text-cyan-400" />
+                                <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Routing Logistics</h4>
                             </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Origin Port</label>
+                                    <input 
+                                        type="text" 
+                                        value={context.origin_port}
+                                        onChange={(e) => setContext({...context, origin_port: e.target.value})}
+                                        placeholder="DXB, JFK..."
+                                        className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors uppercase"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Arrival Port</label>
+                                    <input 
+                                        type="text" 
+                                        value={context.arrival_port}
+                                        onChange={(e) => setContext({...context, arrival_port: e.target.value})}
+                                        placeholder="CDG, LHR..."
+                                        className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors uppercase"
+                                    />
+                                </div>
+                            </div>
+
                             <div className="space-y-1.5">
-                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Intended Usage</label>
+                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Trip Intent</label>
                                 <select 
-                                    value={context.goods_usage}
-                                    onChange={(e) => setContext({...context, goods_usage: e.target.value as any})}
+                                    value={context.trip_intent}
+                                    onChange={(e) => setContext({...context, trip_intent: e.target.value as any})}
                                     className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
                                 >
-                                    <option value="personal">Personal Use</option>
-                                    <option value="commercial">Commercial/Resale</option>
-                                    <option value="gift">Gift for Third Party</option>
+                                    <option value="tourism">Tourism / Leisure</option>
+                                    <option value="business">Business / Professional</option>
+                                    <option value="transit">Transit / Connection</option>
+                                    <option value="family_visit">Visiting Family/Friends</option>
+                                    <option value="other">Other / Specialized</option>
                                 </select>
                             </div>
                         </div>
+
+                        {/* Customs Compliance Column */}
+                        <div className="space-y-6 bg-gray-900/30 p-6 rounded-2xl border border-gray-700/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <CubeIcon className="w-4 h-4 text-orange-400" />
+                                <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Customs Declaration</h4>
+                            </div>
+                            
+                            <div className="space-y-1.5">
+                                <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Goods Classification</label>
+                                <input 
+                                    type="text" 
+                                    value={context.goods_type}
+                                    onChange={(e) => setContext({...context, goods_type: e.target.value})}
+                                    placeholder="Electronics, Clothing, Cash..."
+                                    className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Declared Value (€)</label>
+                                    <input 
+                                        type="number" 
+                                        value={context.declared_goods_value}
+                                        onChange={(e) => setContext({...context, declared_goods_value: Number(e.target.value)})}
+                                        className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="block text-[8px] font-black text-gray-500 uppercase tracking-widest ml-1">Intended Usage</label>
+                                    <select 
+                                        value={context.goods_usage}
+                                        onChange={(e) => setContext({...context, goods_usage: e.target.value as any})}
+                                        className="w-full bg-gray-950 border border-gray-700 rounded-xl px-4 py-3 text-xs font-bold text-gray-300 outline-none focus:border-cyan-500 transition-colors"
+                                    >
+                                        <option value="personal">Personal Use</option>
+                                        <option value="commercial">Commercial/Resale</option>
+                                        <option value="gift">Gift for Third Party</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Analysis Triggers */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                        <button 
+                            onClick={runBorderAnalysis}
+                            disabled={isBorderAnalyzing || isCustomsAnalyzing}
+                            className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 border-b-4 border-blue-800 ${
+                                isBorderAnalyzing ? 'bg-blue-900/40 border-blue-500/50 text-blue-400 animate-pulse' : 'bg-blue-600 hover:bg-blue-500 text-white'
+                            }`}
+                        >
+                            {isBorderAnalyzing ? (
+                                <span className="flex items-center gap-2">
+                                    {currentStepIcon} {fusionStep.split(':')[0]}...
+                                </span>
+                            ) : (
+                                <>
+                                    <ShieldCheckIcon className="w-5 h-5" />
+                                    Run Security Check
+                                </>
+                            )}
+                        </button>
+
+                        <button 
+                            onClick={runCustomsAnalysis}
+                            disabled={isBorderAnalyzing || isCustomsAnalyzing}
+                            className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 border-b-4 border-orange-800 ${
+                                isCustomsAnalyzing ? 'bg-orange-900/40 border-orange-500/50 text-orange-400 animate-pulse' : 'bg-orange-600 hover:bg-orange-500 text-white'
+                            }`}
+                        >
+                            {isCustomsAnalyzing ? (
+                                <span className="flex items-center gap-2">
+                                    {currentStepIcon} {fusionStep.split(':')[0]}...
+                                </span>
+                            ) : (
+                                <>
+                                    <CubeIcon className="w-5 h-5" />
+                                    Run Customs Audit
+                                </>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Fused Intelligence Panel */}
+                    {(borderResult || customsResult) && (
+                      <IntelligencePanel 
+                        result={{ 
+                            border: borderResult || undefined, 
+                            customs: customsResult || undefined 
+                        }} 
+                        traveler={{
+                          name: wallet.owner.full_name,
+                          id: wallet.credentials[0]?.id_number || 'UNKNOWN',
+                          nationality: wallet.owner.nationality
+                        }}
+                      />
+                    )}
                 </div>
-
-                {/* Analysis Triggers */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-                    <button 
-                        onClick={runBorderAnalysis}
-                        disabled={isBorderAnalyzing || isCustomsAnalyzing}
-                        className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 border-b-4 border-blue-800 ${
-                            isBorderAnalyzing ? 'bg-blue-900/40 border-blue-500/50 text-blue-400 animate-pulse' : 'bg-blue-600 hover:bg-blue-500 text-white'
-                        }`}
-                    >
-                        {isBorderAnalyzing ? (
-                            <span className="flex items-center gap-2">
-                                {currentStepIcon} {fusionStep.split(':')[0]}...
-                            </span>
-                        ) : (
-                            <>
-                                <ShieldCheckIcon className="w-5 h-5" />
-                                Run Security Check
-                            </>
-                        )}
-                    </button>
-
-                    <button 
-                        onClick={runCustomsAnalysis}
-                        disabled={isBorderAnalyzing || isCustomsAnalyzing}
-                        className={`py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-3 active:scale-95 border-b-4 border-orange-800 ${
-                            isCustomsAnalyzing ? 'bg-orange-900/40 border-orange-500/50 text-orange-400 animate-pulse' : 'bg-orange-600 hover:bg-orange-500 text-white'
-                        }`}
-                    >
-                        {isCustomsAnalyzing ? (
-                            <span className="flex items-center gap-2">
-                                {currentStepIcon} {fusionStep.split(':')[0]}...
-                            </span>
-                        ) : (
-                            <>
-                                <CubeIcon className="w-5 h-5" />
-                                Run Customs Audit
-                            </>
-                        )}
-                    </button>
-                </div>
-
-                {/* Fused Intelligence Panel */}
-                {(borderResult || customsResult) && (
-                  <IntelligencePanel 
-                    result={{ 
-                        border: borderResult || undefined, 
-                        customs: customsResult || undefined 
-                    }} 
-                    traveler={{
-                      name: wallet.owner.full_name,
-                      id: wallet.credentials[0]?.id_number || 'UNKNOWN',
-                      nationality: wallet.owner.nationality
-                    }}
-                  />
-                )}
-            </div>
+            )}
 
             <SISHistory 
                 history={wallet.owner.crossing_history} 
